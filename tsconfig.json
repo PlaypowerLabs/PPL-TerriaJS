@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "experimentalDecorators": true,
+    "module": "esNext",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "strict": true,
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "useDefineForClassFields": true, // required for mobx6 - https://mobx.js.org/installation.html#use-spec-compliant-transpilation-for-class-properties
+    "outDir": "ts-out",
+    "resolveJsonModule": true,
+    "typeRoots": [
+      "./lib/ThirdParty/",
+      "./node_modules/",
+      "./node_modules/@types/",
+      "../node_modules/",
+      "../node_modules/@types/",
+      "../../node_modules/",
+      "../../node_modules/@types/",
+      "../../../node_modules/",
+      "../../../node_modules/@types/"
+    ],
+    "types": ["terriajs-cesium"]
+  },
+  "include": [
+    "./lib/**/*",
+    "./test/**/*",
+    "./buildprocess/generateDocs.ts",
+    "./buildprocess/**/*"
+  ]
+}
