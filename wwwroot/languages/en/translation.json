@@ -403,6 +403,30 @@
     "loadSceneErrorTitle": "Error loading Story Scene",
     "loadSceneErrorMessage": "An error occurred while loading data for story scene: `{{title}}`."
   },
+  "pin": {
+    "pin": "Pin",
+    "panelTitle": "Pin editor",
+    "emptyPin": "No Pins Found",    
+    "panelBody": "Edit or remove the pins from map",
+    "badgeBarLabel": "Pins",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "removeAllPins": "Remove All",
+    "removePinDialog": "Are you sure you wish to delete '<1>{{pinName}}</1>'?",
+    "removeAllPinsDialog": "Are you sure you wish to delete {{ count }} pin?",
+    "editPin": "edit",
+    "deletePin": "delete",
+    "viewPin": "view",
+    "editor": {
+      "placeholder": "Enter a title here",
+      "cancelBtn": "cancel",
+      "cancelEditing": "Cancel",
+      "saveBtn": "save",
+      "savePin": "Save"
+    },
+    "editPinTitle": "Edit Pin"
+  },
   "satelliteGuidance": {
     "menuTitle": "You can access map guides at any time by looking in the <2>help menu</2>.",
     "dismissText": "Got it, thanks!",

@@ -2,7 +2,7 @@ import classNames from "classnames";
 import "inobounce";
 import { action } from "mobx";
 import { observer } from "mobx-react";
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DefaultTheme } from "styled-components";
 import combine from "terriajs-cesium/Source/Core/combine";
@@ -43,6 +43,13 @@ import processCustomElements from "./processCustomElements";
 import SidePanelContainer from "./SidePanelContainer";
 import Styles from "./standard-user-interface.scss";
 import { terriaTheme } from "./StandardTheme";
+import Color from "terriajs-cesium/Source/Core/Color";
+import CustomDataSource from "terriajs-cesium/Source/DataSources/CustomDataSource";
+import PinBuilder from "terriajs-cesium/Source/Core/PinBuilder";
+import PinEditor from "../../ReactViews/Pin/PinEditor";
+import PinBuilderComponent from "../../ReactViews/Pin/PinBuilder";
+import { setDoc, doc } from "firebase/firestore";
+import { db } from "../../../firebase";
 
 export const animationDuration = 250;
 
@@ -79,6 +86,10 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
       e.dataTransfer.dropEffect = "copy";
       acceptDragDropFile();
     };
+
+    function getPinId(longitude: any, latitude: any) {
+      return "pin_" + longitude.toString() + "_" + latitude.toString();
+    }
 
     const shouldUseMobileInterface = () =>
       document.body.clientWidth < (props.minimumLargeScreenWidth ?? 768);
@@ -133,11 +144,52 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
       props.children
     );
 
+    const [pins, setPins] = useState(new CustomDataSource("Drop Pins"));
+    const [pinColor, setPinColor] = useState("#000000");
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+    const [pinEditorShown, setPinEditorShown] = useState(false);
+
+    const pinClicked = (lat : number, long : number) => {
+      setLatitude(lat);
+      setLongitude(long);
+      setPinEditorShown(true);
+    }
+
+    const onSave = (name : string, color : string, id : string) => {
+      const pinBuilder = new PinBuilder();
+      const pinId =  getPinId(longitude, latitude);
+      const pinCustom = {
+        metadata: {
+          color: color,
+          id: pinId
+        },
+        data: {
+          name: name,
+          location: {
+            longitude,
+            latitude
+          },
+          customMarkerIcon: pinBuilder.fromColor(Color.fromCssColorString(color), 48).toDataURL()
+        }
+      }
+      setDoc(
+        doc(db, "Pins",),
+        JSON.parse(JSON.stringify(pinCustom))
+      );
+      setPinEditorShown(false);
+      if (props.viewState.pinsBuilderShown) {
+        props.viewState.togglePinsBuilder();
+      }
+    }
+
     const terria = props.terria;
 
     const showStoryBuilder =
       props.viewState.storyBuilderShown &&
       !props.viewState.useSmallScreenInterface;
+    const showPinsBuilder =
+      props.viewState.pinsBuilderShown;
     const showStoryPanel =
       props.terria.configParameters.storyEnabled &&
       props.terria.stories.length > 0 &&
@@ -279,15 +331,29 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
                 props.viewState.topElement = "FeatureInfo";
               })}
             >
-              <FeatureInfoPanel />
+              <FeatureInfoPanel 
+                pinClicked={(long, lat) => pinClicked(lat, long)}
+              />
             </div>
             <DragDropFile />
             <DragDropNotification />
             {showStoryPanel && <StoryPanel />}
+            {pinEditorShown && (
+              <PinEditor
+                  exitEditingMode={() => setPinEditorShown(false)}
+                  save={({ name, color, id }) => onSave(name, color, id)}
+              />
+            )}
           </div>
           {props.terria.configParameters.storyEnabled && showStoryBuilder && (
             <StoryBuilder
               isVisible={showStoryBuilder}
+              animationDuration={animationDuration}
+            />
+          )}
+          {showPinsBuilder && (
+            <PinBuilderComponent
+              isVisible={showPinsBuilder}
               animationDuration={animationDuration}
             />
           )}

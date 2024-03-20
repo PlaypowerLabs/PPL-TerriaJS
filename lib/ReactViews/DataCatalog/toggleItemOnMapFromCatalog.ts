@@ -62,6 +62,8 @@ export default async function toggleItemOnMapFromCatalog(
     await viewState.terria.workbench.remove(item);
   }
 
+  window.dispatchEvent(new Event('storage'));
+
   addOrRemoveFromTimelineStack(viewState.terria, item, op);
 
   if (viewState.terria.workbench.contains(item) && !keepCatalogOpen) {

@@ -7,7 +7,6 @@ import { withTranslation } from "react-i18next";
 import Cartesian3 from "terriajs-cesium/Source/Core/Cartesian3";
 import Ellipsoid from "terriajs-cesium/Source/Core/Ellipsoid";
 import CesiumMath from "terriajs-cesium/Source/Core/Math";
-import DataSource from "terriajs-cesium/Source/DataSources/DataSource";
 import Entity from "terriajs-cesium/Source/DataSources/Entity";
 import flatten from "../../Core/flatten";
 import isDefined from "../../Core/isDefined";
@@ -32,10 +31,6 @@ import Loader from "../Loader";
 import { withViewState } from "../Context";
 import Styles from "./feature-info-panel.scss";
 import FeatureInfoCatalogItem from "./FeatureInfoCatalogItem";
-import PinBuilder from "terriajs-cesium/Source/Core/PinBuilder";
-import Color from "terriajs-cesium/Source/Core/Color";
-import VerticalOrigin from "terriajs-cesium/Source/Scene/VerticalOrigin";
-import CustomDataSource from "terriajs-cesium/Source/DataSources/CustomDataSource";
 
 const DragWrapper = require("../DragWrapper");
 
@@ -43,6 +38,7 @@ interface Props {
   viewState: ViewState;
   printView?: boolean;
   t: TFunction;
+  pinClicked: Function;
 }
 
 interface State {
@@ -51,15 +47,9 @@ interface State {
 
 @observer
 class FeatureInfoPanel extends React.Component<Props, State> {
-  pins : CustomDataSource;
-
   constructor(props: Props) {
     super(props);
-    this.state = {
-      pinColor : "#000000"
-    }
     makeObservable(this);
-    this.pins = new CustomDataSource("Drop Pins");
   }
 
   componentDidMount() {
@@ -206,22 +196,6 @@ class FeatureInfoPanel extends React.Component<Props, State> {
     });
   }
 
-  pinClicked(longitude: number, latitude: number) {
-    const pinBuilder = new PinBuilder();
-    const testPin = {
-      name: "Drop pin",
-      position: Cartesian3.fromDegrees(longitude, latitude),
-      billboard: {
-        image: pinBuilder
-          .fromColor(Color.fromCssColorString(this.state.pinColor), 48)
-          .toDataURL(),
-        verticalOrigin: VerticalOrigin.BOTTOM
-      }
-    };
-    this.pins.entities.add(testPin);
-    this.props.viewState.terria.cesium?.dataSources.add(this.pins);
-  }
-
   // locationUpdated(longitude, latitude) {
   //   if (
   //     isDefined(latitude) &&
@@ -260,7 +234,7 @@ class FeatureInfoPanel extends React.Component<Props, State> {
 
     const that = this;
     const pinClicked = function () {
-      that.pinClicked(longitude, latitude);
+      that.props.pinClicked(longitude, latitude);
     };
 
     const locationButtonStyle = isMarkerVisible(this.props.viewState.terria)
@@ -280,14 +254,6 @@ class FeatureInfoPanel extends React.Component<Props, State> {
             >
               <Icon glyph={Icon.GLYPHS.location} />
             </button>
-          )}
-          {!this.props.printView && (
-            <input 
-              type="color"
-              value={this.state.pinColor}
-              onChange={(e) => this.setState({ pinColor : e.target.value })}
-              className={locationButtonStyle}
-            />
           )}
         </span>
       </div>

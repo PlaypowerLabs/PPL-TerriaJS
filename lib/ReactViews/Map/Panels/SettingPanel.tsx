@@ -79,6 +79,7 @@ class SettingPanel extends React.Component<PropTypes> {
       const baseMapId = baseMap.uniqueId;
       if (baseMapId) {
         this.props.terria.setLocalProperty("basemap", baseMapId);
+        window.dispatchEvent(new Event('storage'));
       }
     }
   }

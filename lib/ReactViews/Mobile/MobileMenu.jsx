@@ -8,13 +8,15 @@ import classNames from "classnames";
 import MobileMenuItem from "./MobileMenuItem";
 import SettingPanel from "../Map/Panels/SettingPanel";
 import SharePanel from "../Map/Panels/SharePanel/SharePanel";
-import { withTranslation } from "react-i18next";
+import { useTranslation, withTranslation } from "react-i18next";
 
 import Styles from "./mobile-menu.scss";
 import { runInAction } from "mobx";
 import LangPanel from "../Map/Panels/LangPanel/LangPanel";
 import { applyTranslationIfExists } from "../../Language/languageHelpers";
 import { Category, HelpAction } from "../../Core/AnalyticEvents/analyticEvents";
+import MenuItem from "../StandardUserInterface/customizable/MenuItem";
+import triggerResize from "../../Core/triggerResize";
 
 @observer
 class MobileMenu extends React.Component {
@@ -57,6 +59,17 @@ class MobileMenu extends React.Component {
     runInAction(() => {
       this.props.viewState.mobileMenuVisible = false;
     });
+  }
+
+  showPinBuilder() {
+    this.hideMenu()
+    this.props.viewState.togglePinsBuilder();
+    this.props.terria.currentViewer.notifyRepaintRequired();
+    // Allow any animations to finish, then trigger a resize.
+    setTimeout(function () {
+      triggerResize();
+    }, this.props.animationDuration || 1);
+    this.props.viewState.toggleFeaturePrompt("pin", false, true);
   }
 
   runStories() {
@@ -124,6 +137,10 @@ class MobileMenu extends React.Component {
               {menuItem}
             </div>
           ))}
+          <MobileMenuItem 
+            caption={t("pin.pin")}
+            onClick={() => this.showPinBuilder()}
+          />
           <div onClick={() => this.hideMenu()}>
             <SettingPanel
               terria={this.props.terria}
@@ -135,6 +152,9 @@ class MobileMenu extends React.Component {
               terria={this.props.terria}
               viewState={this.props.viewState}
             />
+          </div>
+          <div onClick={() => this.hideMenu()}>
+            
           </div>
           {this.props.menuItems.map((menuItem) => (
             <div

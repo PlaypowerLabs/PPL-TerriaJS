@@ -14,6 +14,7 @@ import StoryButton from "./StoryButton/StoryButton";
 import HelpButton from "./HelpButton/HelpButton";
 
 import Styles from "./menu-bar.scss";
+import PinButton from "terriajs/lib/ReactViews/Map/MenuBar/PinButton/PinButton";
 
 const StyledMenuBar = styled.div`
   pointer-events: none;
@@ -93,6 +94,15 @@ const MenuBar = observer((props) => {
             </li>
           </ul>
         )}
+        <ul className={classNames(Styles.menu)}>
+            <li className={Styles.menuItem}>
+              <PinButton
+                terria={terria}
+                viewState={viewState}
+                theme={props.theme}
+              />
+            </li>
+          </ul>
         <ul className={classNames(Styles.menu)}>
           <li className={Styles.menuItem}>
             <SharePanel

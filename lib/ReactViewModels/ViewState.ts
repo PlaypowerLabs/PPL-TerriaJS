@@ -90,6 +90,7 @@ export default class ViewState {
   @observable portals: Map<string, HTMLElement | null> = new Map();
   @observable lastUploadedFiles: any[] = [];
   @observable storyBuilderShown: boolean = false;
+  @observable pinsBuilderShown: boolean = false;
 
   // Flesh out later
   @observable showHelpMenu: boolean = false;
@@ -571,6 +572,17 @@ export default class ViewState {
   @action
   toggleStoryBuilder() {
     this.storyBuilderShown = !this.storyBuilderShown;
+    if (this.pinsBuilderShown) {
+      this.togglePinsBuilder()
+    }
+  }
+
+  @action
+  togglePinsBuilder() {
+    this.pinsBuilderShown = !this.pinsBuilderShown;
+    if (this.storyBuilderShown) {
+      this.toggleStoryBuilder()
+    }
   }
 
   @action
@@ -827,6 +839,7 @@ export default class ViewState {
   @action
   runStories() {
     this.storyBuilderShown = false;
+    this.pinsBuilderShown = false;
     this.storyShown = true;
 
     setTimeout(function () {

@@ -583,9 +583,10 @@ interface RemoveDialogProps {
   text: React.ReactElement;
   onConfirm: () => void;
   closeDialog: () => void;
+  fromPinBuilder?: boolean
 }
 
-const RemoveDialog: React.FC<RemoveDialogProps> = (props) => {
+export const RemoveDialog: React.FC<RemoveDialogProps> = (props) => {
   const { t } = useTranslation();
   return (
     <Box
