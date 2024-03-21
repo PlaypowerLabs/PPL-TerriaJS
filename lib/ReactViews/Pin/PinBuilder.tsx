@@ -209,10 +209,8 @@ class PinBuilder extends React.Component<
 
     @action.bound
     async removeAllPins() {
-        const basemap = this.props.viewState.terria.getLocalProperty("basemap") as string;
-        if (basemap !== undefined && basemap !== null) {
-            await removePins(basemap);
-        }
+        const basemap = this.props.viewState.terria.getLocalProperty("basemap")?.toString() || "basemap-bing-aerial-with-labels";
+        await removePins(basemap);
         this.props.viewState.togglePinsBuilder();
     }
 
