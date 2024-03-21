@@ -41,6 +41,7 @@ import SearchState from "./SearchState";
 import CatalogSearchProviderMixin from "../ModelMixins/SearchProviders/CatalogSearchProviderMixin";
 import { getMarkerCatalogItem } from "../Models/LocationMarkerUtils";
 import CzmlCatalogItem from "../Models/Catalog/CatalogItems/CzmlCatalogItem";
+import { Pin } from "../ReactViews/Pin/PinBuilder";
 
 export const DATA_CATALOG_NAME = "data-catalog";
 export const USER_DATA_NAME = "my-data";
@@ -116,6 +117,7 @@ export default class ViewState {
    * automatically set when rendering <ActionBar>
    */
   @observable isActionBarVisible = false;
+  @observable locationPins: Pin[] = []
 
   /**
    * A global list of functions that generate a {@link ViewingControl} option
@@ -621,6 +623,16 @@ export default class ViewState {
   clearPreviewedItem() {
     this.userDataPreviewedItem = undefined;
     this._previewedItem = undefined;
+  }
+
+  @action 
+  setLocationPins(pins : Pin[]) {
+    this.locationPins = pins;
+  }
+
+  @action
+  getLocationPins() {
+    return this.locationPins;
   }
 
   /**

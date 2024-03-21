@@ -71,16 +71,13 @@ class SettingPanel extends React.Component<PropTypes> {
     if (!MappableMixin.isMixedInto(baseMap)) return;
 
     this.props.terria.mainViewer.setBaseMap(baseMap);
-    // this.props.terria.baseMapContrastColor = baseMap.contrastColor;
 
-    // We store the user's chosen basemap for future use, but it's up to the instance to decide
-    // whether to use that at start up.
-    if (baseMap) {
-      const baseMapId = baseMap.uniqueId;
-      if (baseMapId) {
-        this.props.terria.setLocalProperty("basemap", baseMapId);
-        window.dispatchEvent(new Event('storage'));
-      }
+    window.dispatchEvent(
+      new CustomEvent("changeBaseMap", { detail: { id: baseMap.uniqueId } })
+    );
+    
+    if (baseMap.uniqueId !== undefined) {
+      this.props.terria.setLocalProperty("basemap", baseMap.uniqueId);
     }
   }
 

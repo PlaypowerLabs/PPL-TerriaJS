@@ -43,13 +43,10 @@ import processCustomElements from "./processCustomElements";
 import SidePanelContainer from "./SidePanelContainer";
 import Styles from "./standard-user-interface.scss";
 import { terriaTheme } from "./StandardTheme";
-import Color from "terriajs-cesium/Source/Core/Color";
 import CustomDataSource from "terriajs-cesium/Source/DataSources/CustomDataSource";
-import PinBuilder from "terriajs-cesium/Source/Core/PinBuilder";
 import PinEditor from "../../ReactViews/Pin/PinEditor";
 import PinBuilderComponent from "../../ReactViews/Pin/PinBuilder";
-import { setDoc, doc } from "firebase/firestore";
-import { db } from "../../../firebase";
+import { savePin } from "terriajs/lib/Core/db";
 
 export const animationDuration = 250;
 
@@ -86,10 +83,6 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
       e.dataTransfer.dropEffect = "copy";
       acceptDragDropFile();
     };
-
-    function getPinId(longitude: any, latitude: any) {
-      return "pin_" + longitude.toString() + "_" + latitude.toString();
-    }
 
     const shouldUseMobileInterface = () =>
       document.body.clientWidth < (props.minimumLargeScreenWidth ?? 768);
@@ -157,30 +150,8 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
     }
 
     const onSave = (name : string, color : string, id : string) => {
-      const pinBuilder = new PinBuilder();
-      const pinId =  getPinId(longitude, latitude);
-      const pinCustom = {
-        metadata: {
-          color: color,
-          id: pinId
-        },
-        data: {
-          name: name,
-          location: {
-            longitude,
-            latitude
-          },
-          customMarkerIcon: pinBuilder.fromColor(Color.fromCssColorString(color), 48).toDataURL()
-        }
-      }
-      setDoc(
-        doc(db, "Pins",),
-        JSON.parse(JSON.stringify(pinCustom))
-      );
+      savePin(color, name, id, longitude, latitude, false, props.viewState.terria.mainViewer.baseMap?.uniqueId!);
       setPinEditorShown(false);
-      if (props.viewState.pinsBuilderShown) {
-        props.viewState.togglePinsBuilder();
-      }
     }
 
     const terria = props.terria;
@@ -332,7 +303,7 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
               })}
             >
               <FeatureInfoPanel 
-                pinClicked={(long, lat) => pinClicked(lat, long)}
+                pinClicked={(long : number, lat : number) => pinClicked(lat, long)}
               />
             </div>
             <DragDropFile />
@@ -341,7 +312,7 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
             {pinEditorShown && (
               <PinEditor
                   exitEditingMode={() => setPinEditorShown(false)}
-                  save={({ name, color, id }) => onSave(name, color, id)}
+                  save={({ name, color, id } : { name : string, color : string, id : string }) => onSave(name, color, id)}
               />
             )}
           </div>

@@ -1,6 +1,6 @@
 import { makeObservable, action } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Trans,  
   withTranslation,
@@ -22,6 +22,8 @@ import { RemoveDialog } from "../Story/StoryBuilder";
 import PinComponent from "./Pin";
 import PinEditor from "./PinEditor";
 import { MarkerDetails } from "../../../lib/Models/LocationMarkerUtils";
+import { deletePin, savePin, removePins } from "../../../lib/Core/db";
+import Rectangle from "terriajs-cesium/Source/Core/Rectangle";
 
 interface IProps {
     isVisible?: boolean;
@@ -54,7 +56,8 @@ const Panel = styled(Box)<PanelProps>`
 
 export interface Pin {
     metadata: PinMetaData,
-    data: MarkerDetails
+    data: MarkerDetails,
+    createdat: Date
 }
 
 interface PinMetaData {
@@ -64,13 +67,14 @@ interface PinMetaData {
 
 interface IState {
     searchText : string;
-    pins : Pin[],
     isRemoving : boolean,
     pinToRemove : Pin | undefined,
     pinRemoveIndex : number | undefined,
     pinWithOpenMenuId : number | undefined,
     editingMode: boolean;
-    currentPin: Pin | undefined
+    currentPin: Pin | undefined,
+    searchState : boolean,
+    searchedData : Pin[]
 }
 
 @observer
@@ -88,16 +92,32 @@ class PinBuilder extends React.Component<
             currentPin: undefined,
             editingMode: false,
             searchText:"",
-            pins : [],
             isRemoving : false,
             pinRemoveIndex : undefined,
             pinToRemove : undefined,
-            pinWithOpenMenuId : undefined
+            pinWithOpenMenuId : undefined,
+            searchState : false,
+            searchedData : []
         }
     }
 
     viewPin(pin : Pin) {
+        const scene = this.props.viewState.terria.cesium?.scene;
+        const latitude = pin.data.location.latitude;
+        const longitude = pin.data.location.longitude;
+        const position = Rectangle.fromDegrees(
+            longitude - 2,
+            latitude - 2,
+            longitude + 2,
+            latitude + 2
+        );
+        if (scene === undefined) {
+            console.log("retuned");
+            return;
+        }
+        this.props.viewState.terria.currentViewer.zoomTo(position);
         this.closeRemoving();
+        this.props.viewState.togglePinsBuilder();
     }
 
     removePin = (index: number, pin: Pin) => {
@@ -130,16 +150,6 @@ class PinBuilder extends React.Component<
         });
     };
 
-    changeSearchText(newText : string) {
-        this.setState({
-            searchText : newText
-        });
-    }
-
-    search() {
-
-    }
-
     hidePinBuilder = () => {
         this.props.viewState.togglePinsBuilder();
         this.props.viewState.terria.currentViewer.notifyRepaintRequired();
@@ -151,9 +161,9 @@ class PinBuilder extends React.Component<
     };
 
     @action.bound
-    removeAction() {
+    async removeAction() {
         if (this.state.pinToRemove && this.state.pinRemoveIndex !== undefined) {
-            
+            await this.deleteSinglePin();
         } else {
             this.removeAllPins();
         }
@@ -164,26 +174,83 @@ class PinBuilder extends React.Component<
         });
     }
 
-    @action.bound
-    removeAllPins() {
-    }
-
     closeRemoving() {
         this.setState({
             isRemoving : false
         })
     }
 
-    onSave() {
-        this.setState({
-            editingMode: false
-        });
+    @action.bound
+    onSave(name : string, color : string, id : string) {
+        const currentPin = this.state.currentPin;
+        if (currentPin != undefined) {
+            savePin(
+                color, name, id, currentPin.data.location.longitude, 
+                currentPin.data.location.latitude, true, this.props.viewState.terria.mainViewer.baseMap?.uniqueId!
+            )
+            this.setState({
+                editingMode: false,
+                currentPin : undefined
+            });
+        }
+    }
+
+    @action.bound
+    async deleteSinglePin() {
+        const currentPin = this.state.pinToRemove;
+        if (currentPin != undefined) {
+            if (await deletePin(currentPin.metadata.id)) {
+                this.setState({
+                    currentPin : undefined
+                });
+            }
+        }
+    }
+
+    @action.bound
+    async removeAllPins() {
+        const basemap = this.props.viewState.terria.getLocalProperty("basemap") as string;
+        if (basemap !== undefined && basemap !== null) {
+            await removePins(basemap);
+        }
+        this.props.viewState.togglePinsBuilder();
     }
 
     render() {
         const { t, i18n } = this.props;
 
         const pinName = this.state.pinToRemove?.data.name;
+        const pins = this.props.viewState.locationPins || [];
+
+        const changeSearchText = (newText : string) => {
+            this.setState({
+                searchText : newText
+            });
+
+            const searchedText = newText.trim();
+            if (searchedText.length === 0) {
+                cancelSearch();
+                return;
+            }
+            const filteredData = pins.filter((item, index) => {
+                return item.data.name.includes(searchedText) || (
+                    (item.data.location.latitude+","+item.data.location.longitude).includes(searchedText)
+                );
+            });
+            this.setState({
+                searchState : true,
+                searchedData: filteredData
+            })
+        }
+    
+        const cancelSearch = () => {
+            console.log("Cancelling");
+            this.setState({
+                searchText : "",
+                searchState : false,
+                searchedData : []
+            })
+        }
 
         const renderPin = () => {
             return (
@@ -197,21 +264,41 @@ class PinBuilder extends React.Component<
                     css={`
                         ${(this.state.isRemoving) &&
                         `opacity: 0.3`}
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;  
                     `}
                 >
-                    {this.state.pins.map((item, index) =>
-                        <PinComponent
-                            key={index}
-                            pin={item}
-                            editPin={() => this.editPin(item)}
-                            viewPin={() => this.viewPin(item)}
-                            deletePin={() => this.removePin(index, item)}
-                            menuOpen={index === this.state.pinWithOpenMenuId}
-                            openMenu={() => this.openMenu(index)}
-                            closeMenu={() => this.openMenu(undefined)}
-                            parentRef={this.pinWrapperRef}
-                        />
+                    {!this.state.searchState ? (
+                        pins.map((item, index) =>
+                            <PinComponent
+                                key={index}
+                                pin={item}
+                                editPin={() => this.editPin(item)}
+                                viewPin={() => this.viewPin(item)}
+                                deletePin={() => this.removePin(index, item)}
+                                menuOpen={index === this.state.pinWithOpenMenuId}
+                                openMenu={() => this.openMenu(index)}
+                                closeMenu={() => this.openMenu(undefined)}
+                                parentRef={this.pinWrapperRef}
+                            />
+                        )
+                    ):(
+                        this.state.searchedData.map((item, index) =>
+                            <PinComponent
+                                key={index}
+                                pin={item}
+                                editPin={() => this.editPin(item)}
+                                viewPin={() => this.viewPin(item)}
+                                deletePin={() => this.removePin(index, item)}
+                                menuOpen={index === this.state.pinWithOpenMenuId}
+                                openMenu={() => this.openMenu(index)}
+                                closeMenu={() => this.openMenu(undefined)}
+                                parentRef={this.pinWrapperRef}
+                            />
+                        )
                     )}
+
+
                 </Box>
             );
         }
@@ -261,7 +348,7 @@ class PinBuilder extends React.Component<
                     <Spacing bottom={3} />
                 </Box>
 
-                {this.state.pins.length === 0 ? (
+                {pins.length === 0 ? (
                     <Box flex={1} centered>
                         <Text large color={this.props.theme.textLightDimmed}>
                             {t("pin.emptyPin")}
@@ -272,29 +359,34 @@ class PinBuilder extends React.Component<
                         
                         <Box paddedHorizontally={2} paddedVertically={2}>
                             <SearchBox
-                                onSearchTextChanged={this.changeSearchText.bind(this)}
-                                onDoSearch={this.search.bind(this)}
+                                onSearchTextChanged={(newText : string) => changeSearchText(newText)}
+                                onDoSearch={() => { return 0; }}
                                 searchText={this.state.searchText}
                                 placeholder={"Search Pin..."}
+                                onClear={() => cancelSearch()}
                             />
                         </Box>
 
                         <Spacing bottom={3} />
 
-                        <BadgeBar
-                            label={t("pin.badgeBarLabel")}
-                            badge={this.state.pins.length}
-                            >
-                            <RawButton
-                                type="button"
-                                onClick={this.toggleRemoveDialog}
-                                textLight
-                                className={Styles.removeButton}
-                            >
-                                <Icon glyph={Icon.GLYPHS.remove} /> {t("pin.removeAllPins")}
-                            </RawButton>
-                        </BadgeBar>
+                        {!this.state.searchState && (
+                            <BadgeBar
+                                label={t("pin.badgeBarLabel")}
+                                badge={pins.length}
+                                >
+                                <RawButton
+                                    type="button"
+                                    onClick={this.toggleRemoveDialog}
+                                    textLight
+                                    className={Styles.removeButton}
+                                >
+                                    <Icon glyph={Icon.GLYPHS.remove} /> {t("pin.removeAllPins")}
+                                </RawButton>
+                            </BadgeBar>
+                        )}
+                        
                         <Spacing bottom={2} />
+
                         {this.state.isRemoving && (
                             <Box paddedHorizontally={2}>
                                 <RemoveDialog
@@ -314,7 +406,7 @@ class PinBuilder extends React.Component<
                                         ) : (
                                             <Text textLight large>
                                                 {t("pin.removeAllPinsDialog", {
-                                                    count: this.state.pins.length
+                                                    count: pins.length
                                                 })}
                                             </Text>
                                         )
@@ -340,7 +432,7 @@ class PinBuilder extends React.Component<
                             <PinEditor
                                 exitEditingMode={() => this.setState({ editingMode: false })}
                                 pin={this.state.currentPin}
-                                save={this.onSave}
+                                save={({ name, color, id  } : { name : string, color : string, id : string }) => this.onSave(name, color, id)}
                             />
                         )}
 

@@ -11,7 +11,7 @@ class PinEditor extends React.Component {
     super(props);
     this.state = {
       name: '',
-      color: '',
+      color: '#000000',
       id: '',
       inView: false
     };
@@ -29,9 +29,9 @@ class PinEditor extends React.Component {
   UNSAFE_componentWillMount() {
     const pin = this.props.pin;
     this.setState({
-      name: pin.main.name,
-      color: pin.color,
-      id: pin.id
+      name: pin.data.name,
+      color: pin.metadata.color,
+      id: pin.metadata.id
     });
   }
 
@@ -78,27 +78,24 @@ class PinEditor extends React.Component {
 
   updateColor(event) {
     this.setState({
-        color: event.target.value
+      color: event.target.value
     })
   }
 
   save() {
+    console.log("hello " + this.state.color);
     this.props.save({
       name: this.state.name,
       color: this.state.color,
       id: this.state.id
-    });
-
-    this.setState({
-      isPopupEditorOpen: false
     });
   }
 
   cancelEditing() {
     this.props.exitEditingMode();
     this.setState({
-      name: this.props.pin.main.name,
-      color: this.props.pin.color
+      name: this.props.pin.data.name,
+      color: this.props.pin.metadata.color
     });
   }
 
@@ -207,5 +204,5 @@ PinEditor.propTypes = {
   exitEditingMode: PropTypes.func,
 };
 
-PinEditor.defaultProps = { pin: { main : { name : "" }, color: "", id: "" } };
+PinEditor.defaultProps = { pin: { data : { name : "" }, metadata : { color: "#000000", id: "" } } };
 export default withTranslation()(PinEditor);
