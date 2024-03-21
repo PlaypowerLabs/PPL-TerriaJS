@@ -1,7 +1,7 @@
-import { doc, setDoc, updateDoc, deleteDoc, getDocs } from "firebase/firestore";
+import { doc, setDoc, updateDoc, deleteDoc, getDocs, collection } from "firebase/firestore";
 import PinBuilder from "terriajs-cesium/Source/Core/PinBuilder";
 // @ts-ignore  
-import { db, collectionRef } from "../../firebase";
+import { db } from "../../firebase";
 import Color from "terriajs-cesium/Source/Core/Color";
 
 const getPinId = (longitude : number, latitude : number) => {
@@ -19,7 +19,7 @@ export const deletePin = async (id : string) => {
 }
 
 export const removePins = async (basemap : string) => {
-  const pinsCollectionRef = collectionRef(db, "Pins");
+  const pinsCollectionRef = collection(db, "Pins");
   try {
     const querySnapshot = await getDocs(pinsCollectionRef);
     querySnapshot.forEach(async (doc) => {
