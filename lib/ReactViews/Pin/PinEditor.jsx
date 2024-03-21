@@ -83,7 +83,6 @@ class PinEditor extends React.Component {
   }
 
   save() {
-    console.log("hello " + this.state.color);
     this.props.save({
       name: this.state.name,
       color: this.state.color,
@@ -160,14 +159,16 @@ class PinEditor extends React.Component {
           </div>
           <div className={Styles.header}>
             <p>Color</p>
-            <input
-              ref={(colorInput) => (this.colorInput = colorInput)}
-              className={Styles.field}
-              type="color"
-              id="color"
-              value={this.state.color}
-              onChange={this.updateColor.bind(this)}
-            />
+            <div className={Styles.fieldColorContainer}>
+              <input
+                ref={(colorInput) => (this.colorInput = colorInput)}
+                className={Styles.fieldColor}
+                type="color"
+                id="color"
+                value={this.state.color}
+                onChange={this.updateColor.bind(this)}
+              />
+            </div>
           </div>
           <Box paddedVertically={2}>
             <button
@@ -179,7 +180,7 @@ class PinEditor extends React.Component {
                 {t("pin.editor.cancelEditing")}
             </button>
             <button
-                disabled={!this.state.name.length}
+                disabled={!this.state.name.trim().length}
                 className={Styles.saveBtn}
                 onClick={this.save}
                 type="button"

@@ -54,6 +54,20 @@
   border-radius: 5px;
 }
 
+.fieldColorContainer {
+  margin-left: 20px;
+  width: 30px;
+  height: 30px;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.fieldColor {
+  height: 100%;
+  width: 100%;
+  transform: scale(2);
+}
+
 .fieldBtn {
   composes: btn from "../../Sass/common/_buttons.scss";
   composes: btn--map from "../../Sass/common/_buttons.scss";

@@ -6,6 +6,8 @@ interface CssExports {
   'doneBtn': string;
   'field': string;
   'fieldBtn': string;
+  'fieldColor': string;
+  'fieldColorContainer': string;
   'header': string;
   'inner': string;
   'is-mounted': string;
