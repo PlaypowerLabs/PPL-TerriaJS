@@ -453,6 +453,8 @@ class StoryBuilder extends React.Component<
     this.props.viewState.toggleStoryBuilder();
     this.props.viewState.toggleStoriesBuilder();
     this.props.viewState.terria.currentViewer.notifyRepaintRequired();
+    this.props.viewState.terria.setStoriesId(null);
+
     // Allow any animations to finish, then trigger a resize.
     setTimeout(function () {
       triggerResize();

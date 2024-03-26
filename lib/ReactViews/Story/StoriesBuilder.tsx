@@ -129,9 +129,10 @@ class StoriesBuilder extends React.Component<
     }
   }
 
-  openStoryItem = () => {
+  openStoryItem = (item : StoryItem | undefined) => {
     this.props.viewState.toggleStoryBuilder();
     this.props.viewState.terria.currentViewer.notifyRepaintRequired();
+    this.props.viewState.terria.setStoriesId(item!.id);
     // Allow any animations to finish, then trigger a resize.
     setTimeout(function () {
         triggerResize();
@@ -160,7 +161,7 @@ class StoriesBuilder extends React.Component<
                     key={index}
                     item={item}
                     editStoryItem={() => this.openStoiesItemEditor(item)}
-                    openStoryItem={() => this.openStoryItem()}
+                    openStoryItem={() => this.openStoryItem(item)}
                     deleteStoryItem={() => this.removeStoryItem(index, item)}
                     menuOpen={index === this.state.storyItemWithOpenMenuId}
                     openMenu={() => this.openMenu(index)}
@@ -250,13 +251,13 @@ class StoriesBuilder extends React.Component<
                     text={
                         this.state.storyItemToRemove ? (
                             <Text textLight large>
-                                <Trans i18nKey="story.removeStoriesItemDialog" i18n={i18n}>
-                                    Are you sure you wish to delete
+                                  Deleting this story will permanently remove all its associated scenes.
+                                  <br/>
+                                    Are you sure you wish to delete 
                                     <TextSpan textLight large bold>
-                                        {{ storyItemName }} 
+                                        {" "}{ storyItemName } 
                                     </TextSpan>
                                     ?
-                                </Trans>
                             </Text>
                         ) : ( <Text></Text> )
                     }
@@ -281,7 +282,7 @@ class StoriesBuilder extends React.Component<
                 <StoriesItemEdior
                     exitEditingMode={() => this.setState({ editingMode: false })}
                     item={this.state.currentStoryItem}
-                    save={({ name } : { name : string }) => { this.saveUpdatedStory(name, this.state.currentStoryItem.id) }}
+                    save={({ name } : { name : string }) => { this.saveUpdatedStory(name, this.state.currentStoryItem!.id!) }}
                     isAdd={false}
                 />
             ):(

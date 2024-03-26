@@ -6,7 +6,9 @@ import {
   observable,
   runInAction,
   toJS,
-  when
+  when,
+  autorun,
+  reaction
 } from "mobx";
 import { createTransformer } from "mobx-utils";
 import Clock from "terriajs-cesium/Source/Core/Clock";
@@ -129,6 +131,18 @@ import { isViewerMode, setViewerMode } from "./ViewerMode";
 import Workbench from "./Workbench";
 import SelectableDimensionWorkflow from "./Workflows/SelectableDimensionWorkflow";
 
+import { db } from "../../firebase";
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  setDoc,
+  doc,
+  addDoc,
+  updateDoc,
+  getDoc
+} from "firebase/firestore";
 // import overrides from "../Overrides/defaults.jsx";
 
 export interface ConfigParameters {
@@ -632,7 +646,19 @@ export default class Terria {
 
   @observable depthTestAgainstTerrainEnabled = false;
 
+
+  @observable stories_id: String | null = null;
   @observable stories: StoryData[] = [];
+  @action
+  setStoriesId(id: String | null) {
+    this.stories_id = id;
+  }
+  @action
+  setStories(stories: StoryData[]) {
+    this.stories = stories;
+  }
+
+
   @observable storyPromptShown: number = 0; // Story Prompt modal will be rendered when this property changes. See StandardUserInterface, section regarding sui.notifications. Ideally move this to ViewState.
 
   /**
@@ -716,6 +742,26 @@ export default class Terria {
         this.analytics = new ConsoleAnalytics();
       }
     }
+    //fetch stories
+    reaction(() => this.stories_id, async (stories_id) => {
+      console.log(toJS(stories_id));
+      if (stories_id !== null) {
+        // @ts-ignore
+        let curr_doc = await getDoc(doc(db, "Stories", stories_id));
+        this.setStories(curr_doc.data()!.data);
+      }
+      else {
+        this.setStories([]);
+      }
+    })
+    //store stories
+    reaction(() => this.stories.length, async (length) => {
+      console.log(toJS(this.stories));
+      if (this.stories_id !== null) {
+        // @ts-ignore
+        updateDoc(doc(db, "Stories", this.stories_id), { modified: new Date().getTime(), data: this.stories });
+      }
+    });
   }
 
   /** Raise error to user.
@@ -1183,7 +1229,7 @@ export default class Terria {
           (baseMapItem) =>
             CatalogMemberMixin.isMixedInto(baseMapItem) &&
             (baseMapItem.item as any).name ===
-              this.baseMapsModel.defaultBaseMapName
+            this.baseMapsModel.defaultBaseMapName
         );
       if (
         baseMapSearch?.item &&
@@ -1640,7 +1686,7 @@ export default class Terria {
       errors.push(
         TerriaError.from(
           "Can not load an un-mappable item to the map. Item Id: " +
-            model.uniqueId
+          model.uniqueId
         )
       );
     }
@@ -1830,7 +1876,7 @@ export default class Terria {
     const newItems: BaseModel[] = [];
 
     // Maintain the model order in the workbench.
-    for (;;) {
+    for (; ;) {
       const model = newItemsRaw.shift();
       if (model) {
         await this.pushAndLoadMapItems(model, newItems, errors);
@@ -1877,14 +1923,14 @@ export default class Terria {
     // not from the workbench.
     runInAction(
       () =>
-        (this.timelineStack.items = this.workbench.items
-          .filter((item) => {
-            return (
-              item.uniqueId && timelineWithShareKeysResolved.has(item.uniqueId)
-            );
-            // && TODO: what is a good way to test if an item is of type TimeVarying.
-          })
-          .map((item) => item as TimeVarying))
+      (this.timelineStack.items = this.workbench.items
+        .filter((item) => {
+          return (
+            item.uniqueId && timelineWithShareKeysResolved.has(item.uniqueId)
+          );
+          // && TODO: what is a good way to test if an item is of type TimeVarying.
+        })
+        .map((item) => item as TimeVarying))
     );
 
     if (isJsonObject(initData.pickedFeatures)) {
@@ -2281,9 +2327,9 @@ async function interpretStartData(
             : SHARE_VERSION,
           initSources: Array.isArray(startData.initSources)
             ? (startData.initSources.filter(
-                (initSource) =>
-                  isJsonString(initSource) || isJsonObject(initSource)
-              ) as (string | JsonObject)[])
+              (initSource) =>
+                isJsonString(initSource) || isJsonObject(initSource)
+            ) as (string | JsonObject)[])
             : []
         };
       }
@@ -2298,17 +2344,17 @@ async function interpretStartData(
             ...startDataV8!.initSources.map((initSource) =>
               isJsonString(initSource)
                 ? // InitSourceFromUrl if string
-                  {
-                    name,
-                    initUrl: initSource,
-                    errorSeverity
-                  }
+                {
+                  name,
+                  initUrl: initSource,
+                  errorSeverity
+                }
                 : // InitSourceFromData if Json Object
-                  {
-                    name,
-                    data: initSource,
-                    errorSeverity
-                  }
+                {
+                  name,
+                  data: initSource,
+                  errorSeverity
+                }
             )
           );
         });

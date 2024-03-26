@@ -4,21 +4,21 @@ import PinBuilder from "terriajs-cesium/Source/Core/PinBuilder";
 import { db } from "../../firebase";
 import Color from "terriajs-cesium/Source/Core/Color";
 
-const getPinId = (longitude : number, latitude : number) => {
+const getPinId = (longitude: number, latitude: number) => {
   return "pin_" + longitude.toString() + "_" + latitude.toString();
 }
 
-export const deletePin = async (id : string) => {
+export const deletePin = async (id: string) => {
   try {
     await deleteDoc(doc(db, "Pins", id));
     return true;
-  }catch(error) {
+  } catch (error) {
     console.log(error)
     return false;
   }
 }
 
-export const removePins = async (basemap : string) => {
+export const removePins = async (basemap: string) => {
   const pinsCollectionRef = collection(db, "Pins");
   try {
     const querySnapshot = await getDocs(pinsCollectionRef);
@@ -36,9 +36,9 @@ export const removePins = async (basemap : string) => {
   }
 }
 
-export const savePin = (color : string, name : string, id : string, longitude : number, latitude : number, isUpdate : boolean, baseMapId : string) => {
+export const savePin = (color: string, name: string, id: string, longitude: number, latitude: number, isUpdate: boolean, baseMapId: string) => {
   const pinBuilder = new PinBuilder();
-  const pinId =  getPinId(longitude, latitude);
+  const pinId = getPinId(longitude, latitude);
   const pinCustom = {
     metadata: {
       color: color,
@@ -68,11 +68,11 @@ export const savePin = (color : string, name : string, id : string, longitude : 
   }
 }
 
-export const createStory = (name : String) => {
+export const createStory = (name: String) => {
   const storyData = {
-    name : name,
-    created : new Date().getTime(),
-    modified : new Date().getTime()
+    name: name,
+    created: new Date().getTime(),
+    modified: new Date().getTime()
   }
   setDoc(
     doc(collection(db, "Stories")),
@@ -80,22 +80,24 @@ export const createStory = (name : String) => {
   );
 }
 
-export const updateStory = (name : String, id : String) => {
+export const updateStory = (name: String, id: String) => {
   const storyData = {
-    name : name,
-    modified : new Date().getTime()
+    name: name,
+    modified: new Date().getTime()
   }
   updateDoc(
+    // @ts-ignore
     doc(db, "Stories", id),
     storyData
   );
 }
 
-export const deleteStory = async (id : String) => {
+export const deleteStory = async (id: String) => {
   try {
+    // @ts-ignore
     await deleteDoc(doc(db, "Stories", id));
     return true;
-  }catch(error) {
+  } catch (error) {
     console.log(error)
     return false;
   }
