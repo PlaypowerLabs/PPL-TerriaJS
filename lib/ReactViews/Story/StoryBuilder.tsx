@@ -451,12 +451,14 @@ class StoryBuilder extends React.Component<
 
   hideStoryBuilder = () => {
     this.props.viewState.toggleStoryBuilder();
+    this.props.viewState.toggleStoriesBuilder();
     this.props.viewState.terria.currentViewer.notifyRepaintRequired();
     // Allow any animations to finish, then trigger a resize.
     setTimeout(function () {
       triggerResize();
     }, this.props.animationDuration || 1);
     this.props.viewState.toggleFeaturePrompt("story", false, true);
+    this.props.viewState.toggleFeaturePrompt("stories", false, true);
   };
 
   render() {

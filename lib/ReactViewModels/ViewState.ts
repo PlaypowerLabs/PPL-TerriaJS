@@ -91,6 +91,7 @@ export default class ViewState {
   @observable portals: Map<string, HTMLElement | null> = new Map();
   @observable lastUploadedFiles: any[] = [];
   @observable storyBuilderShown: boolean = false;
+  @observable storiesBuilderShown: boolean = false;
   @observable pinsBuilderShown: boolean = false;
 
   // Flesh out later
@@ -575,7 +576,21 @@ export default class ViewState {
   toggleStoryBuilder() {
     this.storyBuilderShown = !this.storyBuilderShown;
     if (this.pinsBuilderShown) {
-      this.togglePinsBuilder()
+      this.pinsBuilderShown = false;
+    }
+    if (this.storiesBuilderShown) {
+      this.storiesBuilderShown = false;
+    }
+  }
+
+  @action
+  toggleStoriesBuilder() {
+    this.storiesBuilderShown = !this.storiesBuilderShown;
+    if (this.pinsBuilderShown) {
+      this.pinsBuilderShown = false;
+    }
+    if (this.storyBuilderShown) {
+      this.storyBuilderShown = false;
     }
   }
 
@@ -583,7 +598,10 @@ export default class ViewState {
   togglePinsBuilder() {
     this.pinsBuilderShown = !this.pinsBuilderShown;
     if (this.storyBuilderShown) {
-      this.toggleStoryBuilder()
+      this.storyBuilderShown = false;
+    }
+    if (this.storiesBuilderShown) {
+      this.storiesBuilderShown = false;
     }
   }
 

@@ -26,13 +26,13 @@ interface ButtonProps extends Props {
 const STORY_BUTTON_NAME = "MenuBarStoryButton";
 
 export const onStoryButtonClick = (props: Props) => () => {
-  props.viewState.toggleStoryBuilder();
+  props.viewState.toggleStoriesBuilder();
   props.terria.currentViewer.notifyRepaintRequired();
   // Allow any animations to finish, then trigger a resize.
   setTimeout(function () {
     triggerResize();
   }, props.animationDuration || 1);
-  props.viewState.toggleFeaturePrompt("story", false, true);
+  props.viewState.toggleFeaturePrompt("stories", false, true);
 };
 
 const promptHtml = (hasStories: boolean) => (

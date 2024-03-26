@@ -47,6 +47,7 @@ import CustomDataSource from "terriajs-cesium/Source/DataSources/CustomDataSourc
 import PinEditor from "../../ReactViews/Pin/PinEditor";
 import PinBuilderComponent from "../../ReactViews/Pin/PinBuilder";
 import { savePin } from "terriajs/lib/Core/db";
+import StoriesBuilder from "../../ReactViews/Story/StoriesBuilder";
 
 export const animationDuration = 250;
 
@@ -161,6 +162,9 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
       !props.viewState.useSmallScreenInterface;
     const showPinsBuilder =
       props.viewState.pinsBuilderShown;
+    const showStoriesBuilder = 
+      props.viewState.storiesBuilderShown &&
+      !props.viewState.useSmallScreenInterface;
     const showStoryPanel =
       props.terria.configParameters.storyEnabled &&
       props.terria.stories.length > 0 &&
@@ -319,6 +323,12 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
           {props.terria.configParameters.storyEnabled && showStoryBuilder && (
             <StoryBuilder
               isVisible={showStoryBuilder}
+              animationDuration={animationDuration}
+            />
+          )}
+          {props.terria.configParameters.storyEnabled && showStoriesBuilder && (
+            <StoriesBuilder
+              isVisible={showStoriesBuilder}
               animationDuration={animationDuration}
             />
           )}

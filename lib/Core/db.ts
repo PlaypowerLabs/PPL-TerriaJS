@@ -61,10 +61,42 @@ export const savePin = (color : string, name : string, id : string, longitude : 
       JSON.parse(JSON.stringify(pinCustom))
     );
   } else {
-    console.log(id);
     updateDoc(
       doc(db, "Pins", id),
       JSON.parse(JSON.stringify(pinCustom))
     )
+  }
+}
+
+export const createStory = (name : String) => {
+  const storyData = {
+    name : name,
+    created : new Date().getTime(),
+    modified : new Date().getTime()
+  }
+  setDoc(
+    doc(collection(db, "Stories")),
+    storyData
+  );
+}
+
+export const updateStory = (name : String, id : String) => {
+  const storyData = {
+    name : name,
+    modified : new Date().getTime()
+  }
+  updateDoc(
+    doc(db, "Stories", id),
+    storyData
+  );
+}
+
+export const deleteStory = async (id : String) => {
+  try {
+    await deleteDoc(doc(db, "Stories", id));
+    return true;
+  }catch(error) {
+    console.log(error)
+    return false;
   }
 }

@@ -350,6 +350,8 @@
   },
   "story": {
     "panelTitle": "Story editor",
+    "title": "Stories",
+    "createStoriesBtn": "Create Stories",
     "panelBody": "Create and share interactive stories directly from your map",
     "gettingStarted": "Getting started",
     "gettingStartedTitle": "Getting started",
@@ -357,6 +359,8 @@
     "share": "Share",
     "viewStory": "view",
     "view": "View",
+    "openStory": "open",
+    "open": "Open",
     "editStory": "edit",
     "edit": "Edit",
     "expand": "Expand",
@@ -370,6 +374,7 @@
     "removeAllStories": "Remove All",
     "removeAllStoriesDialog": "Are you sure you wish to delete {{ count }} scene?",
     "removeAllStoriesDialog_plural": "Are you sure you wish to delete {{ count }} scenes?",
+    "removeStoriesItemDialog": "Are you sure you wish to delete '<1>{{storyItemName}}</1>'?",
     "removeStoryDialog": "Are you sure you wish to delete '<1>{{storyName}}</1>'?",
     "preview": "preview stories",
     "play": "Play",
@@ -382,6 +387,11 @@
       "cancelEditing": "Cancel",
       "saveBtn": "save",
       "saveStory": "Save"
+    },
+    "storyItemEditor": {
+      "createStoryTitle": "Create Story",
+      "updateStoryTitle": "Edit Story",
+      "placeholder": "Enter a name here"
     },
     "locationBtn": "center scene",
     "exitBtn": "exit story",
