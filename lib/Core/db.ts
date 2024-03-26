@@ -72,7 +72,8 @@ export const createStory = (name: String) => {
   const storyData = {
     name: name,
     created: new Date().getTime(),
-    modified: new Date().getTime()
+    modified: new Date().getTime(),
+    data: [],
   }
   setDoc(
     doc(collection(db, "Stories")),
