@@ -650,7 +650,7 @@ export default class Terria {
   @observable stories_id: string | null = null;
   @observable stories: StoryData[] = [];
   @action
-  setStoriesId(id: String | null) {
+  setStoriesId(id: string | null) {
     this.stories_id = id;
   }
   @action
