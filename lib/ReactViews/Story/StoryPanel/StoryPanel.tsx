@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { runInAction } from "mobx";
+import { runInAction, toJS } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
 import { WithTranslation, withTranslation } from "react-i18next";
@@ -22,6 +22,9 @@ import Styles from "../story-panel.scss";
 import StoryBody from "./StoryBody";
 import FooterBar from "./StoryFooterBar";
 import TitleBar from "./TitleBar";
+import ViewState from "../../../ReactViewModels/ViewState";
+import { addMarker, removeMarker } from "../../../Models/LocationMarkerUtils";
+import { Pin } from "../../../ReactViews/Pin/PinBuilder";
 
 /**
  *
@@ -29,7 +32,7 @@ import TitleBar from "./TitleBar";
  * @param {Terria} terria
  */
 
-export async function activateStory(scene: Story, terria: Terria) {
+export async function activateStory(scene: Story, terria: Terria, viewState : ViewState) {
   terria.analytics?.logEvent(
     Category.story,
     StoryAction.viewScene,
@@ -41,6 +44,13 @@ export async function activateStory(scene: Story, terria: Terria) {
     await Promise.all(
       scene.shareData.initSources.map(async (initSource: any) => {
         try {
+          const initData = toJS(initSource);
+          if (initData.pins !== undefined) {
+            viewState.setLocationPins([] as Pin[]);
+            (initData.pins as Pin[]).forEach((item) => {
+              addMarker(terria, item.data);
+            });
+          }
           await terria.applyInitData({
             initData: initSource,
             replaceStratum: true,
@@ -104,6 +114,7 @@ class StoryPanel extends React.Component<Props, State> {
     ) {
       this.props.viewState.currentStoryId = 0;
     }
+    removeMarker(this.props.viewState.terria);
     this.activateStory(stories[this.props.viewState.currentStoryId]);
 
     this.slideIn();
@@ -178,11 +189,11 @@ class StoryPanel extends React.Component<Props, State> {
   // This is in StoryPanel and StoryBuilder
   activateStory(_story: Story | any) {
     const story = _story ? _story : this.props.viewState.terria.stories[0];
-    activateStory(story, this.props.viewState.terria);
+    activateStory(story, this.props.viewState.terria, this.props.viewState);
   }
 
   onCenterScene(story: Story) {
-    activateStory(story, this.props.viewState.terria);
+    activateStory(story, this.props.viewState.terria, this.props.viewState);
   }
 
   goToPrevStory() {
@@ -201,6 +212,9 @@ class StoryPanel extends React.Component<Props, State> {
       this.props.viewState.terria.currentViewer.notifyRepaintRequired();
     });
     this.slideOut();
+    window.dispatchEvent(
+      new CustomEvent("storyStopped")
+    );
   }
 
   render() {

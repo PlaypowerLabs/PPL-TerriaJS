@@ -647,7 +647,7 @@ export default class Terria {
   @observable depthTestAgainstTerrainEnabled = false;
 
 
-  @observable stories_id: String | null = null;
+  @observable stories_id: string | null = null;
   @observable stories: StoryData[] = [];
   @action
   setStoriesId(id: String | null) {
@@ -746,7 +746,6 @@ export default class Terria {
     reaction(() => this.stories_id, async (stories_id) => {
       console.log(toJS(stories_id));
       if (stories_id !== null) {
-        // @ts-ignore
         let curr_doc = await getDoc(doc(db, "Stories", stories_id));
         this.setStories(curr_doc.data()!.data);
       }
@@ -758,7 +757,6 @@ export default class Terria {
     reaction(() => this.stories.length, async (length) => {
       console.log(toJS(this.stories));
       if (this.stories_id !== null) {
-        // @ts-ignore
         updateDoc(doc(db, "Stories", this.stories_id), { modified: new Date().getTime(), data: this.stories });
       }
     });
@@ -1809,6 +1807,7 @@ export default class Terria {
         );
       }
       if (isJsonString(initData.settings.baseMapId)) {
+        this.mainViewer.terria.setLocalProperty("basemap", initData.settings.baseMapId);
         this.mainViewer.setBaseMap(
           this.baseMapsModel.baseMapItems.find(
             (item) => item.item.uniqueId === initData.settings!.baseMapId

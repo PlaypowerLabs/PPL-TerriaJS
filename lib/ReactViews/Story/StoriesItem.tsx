@@ -15,7 +15,7 @@ export interface StoryItem {
     name : String,
     created : String,
     modified : String,
-    id : String
+    id : string
 }
 
 interface Props {

@@ -8,7 +8,7 @@ import LatLonHeight from "../Core/LatLonHeight";
 import { toJS } from "mobx";
 export const LOCATION_MARKER_DATA_SOURCE_NAME =
     "TerriaJS Location Marker Points";
-export const MARKER_UNIQUE_ID = "__TERRRIAJS-LOCATIONMARKER__";
+export const MARKER_UNIQUE_ID = "TERRRIAJS-LOCATIONMARKER";
 export interface MarkerDetails
 {
     name: string;

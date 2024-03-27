@@ -120,6 +120,9 @@ export function getShareData(
     addTimelineItems(terria, initSource);
     addViewSettings(terria, viewState, initSource);
     addFeaturePicking(terria, initSource);
+    if (viewState != undefined) {
+      addPins(viewState, initSource);
+    }
     if (includeStories) {
       // info that are not needed in scene share data
       addStories(terria, initSource);
@@ -181,6 +184,10 @@ function addTimelineItems(terria: Terria, initSources: InitSourceData) {
   initSources.timeline = terria.timelineStack.itemIds.filter(
     isShareable(terria)
   );
+}
+
+function addPins(viewState : ViewState, initSource: InitSourceData) {
+  initSource.pins = viewState.locationPins;
 }
 
 function addModelStratum(

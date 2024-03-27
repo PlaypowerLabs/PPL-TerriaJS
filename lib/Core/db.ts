@@ -81,21 +81,19 @@ export const createStory = (name: String) => {
   );
 }
 
-export const updateStory = (name: String, id: String) => {
+export const updateStory = (name: string, id: string) => {
   const storyData = {
     name: name,
     modified: new Date().getTime()
   }
   updateDoc(
-    // @ts-ignore
     doc(db, "Stories", id),
     storyData
   );
 }
 
-export const deleteStory = async (id: String) => {
+export const deleteStory = async (id: string) => {
   try {
-    // @ts-ignore
     await deleteDoc(doc(db, "Stories", id));
     return true;
   } catch (error) {

@@ -43,7 +43,6 @@ import processCustomElements from "./processCustomElements";
 import SidePanelContainer from "./SidePanelContainer";
 import Styles from "./standard-user-interface.scss";
 import { terriaTheme } from "./StandardTheme";
-import CustomDataSource from "terriajs-cesium/Source/DataSources/CustomDataSource";
 import PinEditor from "../../ReactViews/Pin/PinEditor";
 import PinBuilderComponent from "../../ReactViews/Pin/PinBuilder";
 import { savePin } from "terriajs/lib/Core/db";
@@ -138,8 +137,6 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
       props.children
     );
 
-    const [pins, setPins] = useState(new CustomDataSource("Drop Pins"));
-    const [pinColor, setPinColor] = useState("#000000");
     const [latitude, setLatitude] = useState(0);
     const [longitude, setLongitude] = useState(0);
     const [pinEditorShown, setPinEditorShown] = useState(false);
@@ -170,7 +167,8 @@ const StandardUserInterfaceBase: React.FC<StandardUserInterfaceProps> =
       props.terria.stories.length > 0 &&
       props.viewState.storyShown &&
       !props.viewState.explorerPanelIsVisible &&
-      !props.viewState.storyBuilderShown;
+      !props.viewState.storyBuilderShown &&
+      !props.viewState.storiesBuilderShown;
     return (
       <ContextProviders viewState={props.viewState} theme={mergedTheme}>
         <GlobalTerriaStyles />

@@ -71,7 +71,7 @@ class StoriesBuilder extends React.Component<
   }
 
   componentWillUnmount(): void {
-      this.storiesUnSubsciber();
+    this.storiesUnSubsciber();
   }
 
   constructor(
@@ -187,12 +187,14 @@ class StoriesBuilder extends React.Component<
     })
   }
 
-  saveUpdatedStory = (name : String, id : String) => {
-    updateStory(name, id);
-    this.setState({
-      editingMode: false,
-      currentStoryItem: undefined
-    });
+  saveUpdatedStory = (name : string, id : string | undefined) => {
+    if (id !== undefined) {
+      updateStory(name, id);
+      this.setState({
+        editingMode: false,
+        currentStoryItem: undefined
+      });
+    }
   }
 
   render() {
@@ -282,7 +284,7 @@ class StoriesBuilder extends React.Component<
                 <StoriesItemEdior
                     exitEditingMode={() => this.setState({ editingMode: false })}
                     item={this.state.currentStoryItem}
-                    save={({ name } : { name : string }) => { this.saveUpdatedStory(name, this.state.currentStoryItem!.id!) }}
+                    save={({ name } : { name : string }) => { this.saveUpdatedStory(name, this.state.currentStoryItem!.id) }}
                     isAdd={false}
                 />
             ):(

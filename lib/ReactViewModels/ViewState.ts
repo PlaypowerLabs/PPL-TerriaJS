@@ -870,6 +870,7 @@ export default class ViewState {
   runStories() {
     this.storyBuilderShown = false;
     this.pinsBuilderShown = false;
+    this.storiesBuilderShown = false;
     this.storyShown = true;
 
     setTimeout(function () {

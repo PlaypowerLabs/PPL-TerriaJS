@@ -4,6 +4,7 @@ import { TerriaErrorSeverity } from "../Core/TerriaError";
 import { ProviderCoordsMap } from "../Map/PickedFeatures/PickedFeatures";
 import { BaseMapsJson } from "./BaseMaps/BaseMapsModel";
 import IElementConfig from "./IElementConfig";
+import { Pin } from "../ReactViews/Pin/PinBuilder";
 
 export interface InitSourcePickedFeatures {
   providerCoords?: ProviderCoordsMap;
@@ -52,6 +53,7 @@ export interface InitSourceData {
   catalog?: JsonObject[];
   elements?: Map<string, IElementConfig>;
   stories?: StoryData[];
+  pins?:Pin[];
   viewerMode?: ViewModeJson;
   baseMaps?: BaseMapsJson;
   homeCamera?: JsonObject;
